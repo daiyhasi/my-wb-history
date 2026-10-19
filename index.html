@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WorkBuddy 本地任务数据总览 · 2026-10-19</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1b1f24; --ink2:#4a535e; --ink3:#8a949f;
+    --line:#e6e9ee; --line2:#eef1f5;
+    --up:#d93a2b; --down:#1f9d55; --accent:#2f6bff; --accent-soft:#eef3ff;
+    --warn:#b7791f; --warn-soft:#fdf6e7;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; font-size:14px; line-height:1.65;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:36px 24px 72px}
+  header{display:flex; align-items:flex-start; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-bottom:26px}
+  h1{font-size:26px; font-weight:700; margin:0 0 8px; letter-spacing:-.3px}
+  .sub{color:var(--ink3); font-size:12.5px; line-height:1.9}
+  .sub b{color:var(--ink2); font-weight:600}
+  .pill{display:inline-block; padding:3px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent);
+        font-size:12px; font-weight:600; margin-left:8px; vertical-align:2px}
+
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:26px 0 30px}
+  .stat{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px}
+  .stat .k{font-size:11.5px; color:var(--ink3); letter-spacing:.4px}
+  .stat .v{font-size:24px; font-weight:700; margin-top:6px; letter-spacing:-.5px}
+  .stat .n{font-size:11.5px; color:var(--ink3); margin-top:2px}
+
+  h2{font-size:15px; font-weight:700; margin:34px 0 14px; padding-left:10px; border-left:3px solid var(--accent)}
+  h2 span{font-weight:400; color:var(--ink3); font-size:12px; margin-left:8px}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px 22px; margin-bottom:12px}
+  .card.main{border-color:#d6e0ff; box-shadow:0 1px 2px rgba(47,107,255,.05)}
+  .card-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .idx{width:24px; height:24px; border-radius:7px; background:#f0f2f5; color:var(--ink2);
+       font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:0 0 auto}
+  .card.main .idx{background:var(--accent); color:#fff}
+  .card-head h3{margin:0; font-size:15.5px; font-weight:650}
+  .meta{margin-left:auto; color:var(--ink3); font-size:12px; font-variant-numeric:tabular-nums}
+  .tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:12px}
+  .tag{font-size:11.5px; padding:2px 8px; border-radius:6px; background:#f4f6f9; color:var(--ink2); border:1px solid var(--line2)}
+  .tag.b{background:var(--accent-soft); color:var(--accent); border-color:#dbe5ff}
+  .body{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line); color:var(--ink2); font-size:13px}
+  .body p{margin:0 0 8px}
+  .body p:last-child{margin-bottom:0}
+  .body strong{color:var(--ink); font-weight:650}
+  ul.q{margin:8px 0 0; padding-left:18px; color:var(--ink2); font-size:12.5px}
+  ul.q li{margin:3px 0}
+
+  table{width:100%; border-collapse:collapse; font-size:12.5px; margin-top:12px; font-variant-numeric:tabular-nums}
+  th,td{padding:7px 8px; text-align:left; border-bottom:1px solid var(--line2)}
+  th{font-size:11.5px; color:var(--ink3); font-weight:600; background:#fafbfc}
+  td.num,th.num{text-align:right}
+  .up{color:var(--up); font-weight:650}
+  .down{color:var(--down); font-weight:650}
+  tr:hover td{background:#fbfcfd}
+
+  .kv{display:grid; grid-template-columns:1fr 1fr; gap:8px 22px; margin-top:10px; font-size:12.5px}
+  .kv div{display:flex; justify-content:space-between; border-bottom:1px dotted var(--line); padding:5px 0}
+  .kv span:first-child{color:var(--ink3)}
+  .kv span:last-child{font-weight:600; font-variant-numeric:tabular-nums}
+
+  .note{background:var(--warn-soft); border:1px solid #f2e2bd; border-radius:10px; padding:12px 16px;
+        font-size:12.5px; color:#7a5a12; margin-top:18px}
+  .note b{color:#6b4c0c}
+  footer{margin-top:34px; color:var(--ink3); font-size:11.5px; line-height:1.9}
+
+  @media (max-width:760px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .kv{grid-template-columns:1fr}
+    .meta{margin-left:0; width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>WorkBuddy 本地任务数据总览<span class="pill">6 个任务</span></h1>
+      <div class="sub">
+        快照时间 <b>2026-10-19 17:05 (GMT+8)</b> ｜ 来源 <b>workbuddy.db + projects/*.jsonl</b> ｜ 设备 <b>daiyhasi / macOS</b><br>
+        时间跨度 <b>2026-09-30 → 2026-10-19</b> ｜ 全部为本地会话，未上云
+      </div>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="k">任务总数</div><div class="v">6</div><div class="n">侧边栏「任务 (6)」全部在列</div></div>
+    <div class="stat"><div class="k">对话轮次</div><div class="v">37<span style="font-size:14px;color:var(--ink3);font-weight:500"> / 98</span></div><div class="n">你提问 / AI 回复</div></div>
+    <div class="stat"><div class="k">Tokens 消耗</div><div class="v">449,016</div><div class="n">5 个任务有统计（单会话上限 30 万）</div></div>
+    <div class="stat"><div class="k">积分消耗</div><div class="v">90.51</div><div class="n">其中 88.67 花在两个交易任务上</div></div>
+  </div>
+
+  <h2>核心任务</h2>
+
+  <div class="card main">
+    <div class="card-head">
+      <div class="idx">1</div>
+      <h3>讨论上涨金叉形态</h3>
+      <div class="meta">10-16 → 10-19 16:57 ｜ 9/40 轮 ｜ 114,796 tok ｜ 36.39 积分</div>
+    </div>
+    <div class="tags">
+      <span class="tag b">deepseek-v4.1-flash</span>
+      <span class="tag b">专家：通达信·多条件组合选股</span>
+      <span class="tag">~/WorkBuddy/2026-10-16-17-17-01</span>
+      <span class="tag">A股 / 选股 / 复盘</span>
+    </div>
+    <div class="body">
+      <p><strong>完整闭环：筛选 → 实盘验证 → 归因复盘 → 修正模型。</strong>条件叠加 MACD金叉 + 当日收涨 + MA5&gt;MA10 且 收盘&gt;MA20 + 主力净流入&gt;0，剔除 ST/亏损/停牌/一字板。全市场金叉 40 只 → 收涨 38 只 → 趋势向上仅 9 只，最终 15 只观察池。</p>
+      <table>
+        <thead><tr><th>#</th><th>标的</th><th class="num">10-19 涨跌</th><th class="num">换手</th><th>MACD</th><th>均线</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>国科军工 688543</td><td class="num up">+7.95%</td><td class="num">6.86%</td><td>金叉延续</td><td>半多头</td></tr>
+          <tr><td>2</td><td>思源电气 002028</td><td class="num up">+5.99%</td><td class="num">2.27%</td><td>金叉延续</td><td>空头</td></tr>
+          <tr><td>3</td><td>锐科激光 300747</td><td class="num up">+5.28%</td><td class="num">8.02%</td><td>金叉延续</td><td>半多头</td></tr>
+          <tr><td>4</td><td>科伦药业 002422</td><td class="num up">+4.58%</td><td class="num">1.86%</td><td>金叉延续</td><td>半多头</td></tr>
+          <tr><td>5</td><td>莱斯信息 688631</td><td class="num up">+3.40%</td><td class="num">3.15%</td><td>金叉延续</td><td>半多头</td></tr>
+          <tr><td>6</td><td>北方长龙 301357</td><td class="num up">+1.56%</td><td class="num">14.11%</td><td>金叉延续</td><td>半多头</td></tr>
+          <tr><td>7</td><td>浙江仙通 603239</td><td class="num up">+1.18%</td><td class="num">4.00%</td><td>金叉延续</td><td><strong>多头</strong></td></tr>
+          <tr><td>8</td><td>六九一二 301592</td><td class="num up">+0.93%</td><td class="num">5.85%</td><td>金叉延续</td><td>半多头</td></tr>
+          <tr><td>9</td><td>华利集团 300979</td><td class="num up">+0.43%</td><td class="num">0.29%</td><td>金叉延续</td><td><strong>多头</strong></td></tr>
+          <tr><td>10</td><td>中科星图 688568</td><td class="num down">−0.95%</td><td class="num">1.60%</td><td>金叉延续</td><td>修复</td></tr>
+          <tr><td>11</td><td>坚朗五金 002791</td><td class="num down">−1.69%</td><td class="num">5.26%</td><td>金叉延续</td><td>修复</td></tr>
+          <tr><td>12</td><td>中简科技 300777</td><td class="num down">−1.92%</td><td class="num">4.51%</td><td>金叉延续</td><td>修复</td></tr>
+          <tr><td>13</td><td>福斯达 603173</td><td class="num down">−3.00%</td><td class="num">1.64%</td><td>金叉延续</td><td>修复</td></tr>
+          <tr><td>14</td><td>佳力奇 301586</td><td class="num down">−5.18%</td><td class="num">16.35%</td><td>金叉延续</td><td>多头</td></tr>
+          <tr><td>15</td><td>华海清科 688120</td><td class="num down">−7.39%</td><td class="num">2.28%</td><td>金叉延续</td><td>空头</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:14px"><strong>整体 9 涨 6 跌，等权 +0.75%，无一死叉。</strong>同期上证 +0.39%、创业板 −0.94%、科创50 −2.17%。</p>
+      <p><strong>最重要的发现：分水岭是 DIF 在零轴上下。</strong>DIF&gt;0 的 6 只平均 <span class="up">+2.35%</span>；DIF&lt;0 的 9 只平均 <span class="down">−0.32%</span>，两组差 2.67 个百分点。单看「金叉」本身无法区分好坏。</p>
+      <div class="kv">
+        <div><span>总投入（每只一手）</span><span>¥93,523</span></div>
+        <div><span>当前市值</span><span>¥92,256</span></div>
+        <div><span>毛浮动盈亏</span><span style="color:var(--down)">−¥1,267 (−1.35%)</span></div>
+        <div><span>净盈亏（含双边费用 ¥200）</span><span style="color:var(--down)">−¥1,467 (−1.57%)</span></div>
+      </div>
+      <p style="margin-top:12px"><strong>亏损根因是仓位结构，不是选股：</strong>华海清科一只占 27.4% 权重，单只 −7.39% 吃掉其余 9 只的盈利 —— 正确率 66.7% 照样亏钱。</p>
+      <ul class="q">
+        <li>❌ <b>华海清科</b>：把「5日主力净流入」当加分项，明知在 MA20 下方只扣 4 分</li>
+        <li>❌ <b>佳力奇</b>：20cm 涨停 + 13.92% 换手 + PE 868 倍，本该扣分却给 80 分（游资一日游）</li>
+        <li>⚠️ <b>锐科激光</b>：标了「资金背离」却涨 5.28% → 单日资金流噪音大，应以 5 日为主</li>
+        <li>✅ <b>浙江仙通</b>：唯一「三维共振」标的，+1.18%，且唯一保持完全多头排列</li>
+      </ul>
+      <p style="margin-top:10px"><strong>沉淀规则（待回测）：</strong>① DIF&gt;0 作为硬门槛；② 收盘价&gt;MA20 排除规则；③ 涨停次日必须验证量能延续。</p>
+    </div>
+  </div>
+
+  <div class="card main">
+    <div class="card-head">
+      <div class="idx">2</div>
+      <h3>分析航天电子股票</h3>
+      <div class="meta">09-30 → 10-16 11:31 ｜ 22/50 轮 ｜ 196,125 tok ｜ 52.28 积分</div>
+    </div>
+    <div class="tags">
+      <span class="tag b">deepseek-v4.1-flash</span>
+      <span class="tag">~/WorkBuddy/2026-09-30-15-40-07</span>
+      <span class="tag">持仓诊断 / 板块事件</span>
+      <span class="tag">轮次最多</span>
+    </div>
+    <div class="body">
+      <p><strong>持仓：2300 股 @ 15.20 元</strong>（约 ¥34,960）。9/30 收盘 13.55 → 浮亏 <span class="down">−¥3,795（−10.86%）</span>，回本需涨 <strong>12.2%</strong>。成本 15.20 恰压在 MA60（15.45）附近，<strong>解套线与中期压力位重叠</strong>。</p>
+      <p><strong>最大问题不是这只票，而是全仓单一标的 + 短线逻辑</strong>：没有二次调整空间，判断错就没有子弹补。</p>
+      <table>
+        <thead><tr><th>支持持有</th><th>构成压力</th></tr></thead>
+        <tbody>
+          <tr><td>利空已在中报一次性释放（7月单月 −31.5%）</td><td>存货 244.93 亿 + 应收 105.95 亿，占总资产 <b>71.39%</b></td></tr>
+          <tr><td>毛利率逆势改善至 21.85%（+1.34pct）</td><td>经营现金流 <b>−23.46 亿</b></td></tr>
+          <tr><td>H1 营收仅完成全年计划 29%，下半年交付</td><td>PE-TTM <b>480x</b>（历史分位 97.5%）</td></tr>
+          <tr><td>机构预期 2026E 净利 3.05 亿（+34.3%）</td><td>主力近5日 −2.27 亿 / 近10日 −3.19 亿；公募持股降至 1.62%</td></tr>
+        </tbody>
+      </table>
+      <div class="kv" style="margin-top:12px">
+        <div><span>13.50（9月低点）</span><span>收盘跌破 = 短线破位</span></div>
+        <div><span>14.33（MA20）</span><span>放量站上守 3 日 = 转强</span></div>
+        <div><span>14.93（20日压力）</span><span>减亏效率最高区间</span></div>
+        <div><span>10/30 三季报</span><span>窗口内唯一硬事件</span></div>
+      </div>
+      <p style="margin-top:12px"><strong>横盘主因：</strong>一年内涨停 10 次，其中 9 次集中在 2025-12 ~ 2026-01 那轮 11→32 元（+190%）行情，靠极高换手堆出（单月换手 325%）；当前换手仅 1%–2%，<strong>没有量就没有涨停</strong>。最近一次涨停 2026-07-10（23.29 元，地天板式长阳），距今约 64 个交易日。</p>
+      <p><strong>Q4 事件日历：</strong>嫦娥七号、神舟二十四号、梦舟首飞、海南发射场二期、朱雀三号复用首飞、引力二号首飞、千帆星座年底 324 颗、珠海航展（12/7–12/13）、「十五五」规划落地。<br>
+      <strong>但航天电子是配套商</strong>：主题利好只是脉冲式冲高（如 8/19 朱雀三号成功后冲 17.25，随后回落到 13.55），真传导到报表要靠「订单→交付→验收→收入确认」。</p>
+      <p><strong>任务内最后一次行情（10/16 11:29）：</strong>前收 12.35（10/15 −4.26% 创本轮新低）；10/16 低开 12.52，最低 12.44，现价 <span class="up">13.01（+5.34%）</span>，半日成交 6.59 亿 / 换手 1.57%，距涨停 13.59 还差 4.5%。</p>
+    </div>
+  </div>
+
+  <h2>其余任务 <span>探索性使用 / 单点产出</span></h2>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="idx">3</div>
+      <h3>AI能理解感觉吗</h3>
+      <div class="meta">10-10 14:47 ｜ 1/2 轮 ｜ 41,728 tok ｜ 0.82 积分</div>
+    </div>
+    <div class="tags"><span class="tag">hy4-preview-f</span><span class="tag">哲学 / 意识难题</span></div>
+    <div class="body">
+      <p>讨论「意识难题」（the hard problem）：为什么信息处理过程会伴随「感觉起来像什么」。结论落在<strong>利害</strong>而非复杂度——人的感觉连着身体、连着受伤后果；模型没有身体、没有连续自我、没有真正「在乎」的东西，可能只有感觉的<strong>形状</strong>，不是感觉本身。</p>
+      <p style="color:var(--ink3)">结尾悬空：双方称呼一直没定下来。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="idx">4</div>
+      <h3>帮我画一个鹈鹕骑着自行车的svg</h3>
+      <div class="meta">09-30 16:19 ｜ 2/3 轮 ｜ 63,772 tok</div>
+    </div>
+    <div class="tags"><span class="tag">hy4-preview-f</span><span class="tag">SVG + SMIL 动画</span></div>
+    <div class="body">
+      <p>产出 <b>pelican-bike.svg</b>（纯 SVG + SMIL，不依赖 CSS/JS）与 <b>pelican-bike-preview.html</b>。动效：车轮 1.05s/圈、曲柄踏频 1.4s、腿部 4 关键帧路径插值、路面虚线滚动 0.45s、速度线错峰、身体颠动 3px。最难的是腿跟随脚踏圆周不脱位。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="idx">5</div>
+      <h3>打招呼</h3>
+      <div class="meta">09-30 15:36 ｜ 2/2 轮 ｜ 32,595 tok ｜ 1.02 积分</div>
+    </div>
+    <div class="tags"><span class="tag">deepseek-v4.1-flash</span><span class="tag">能力清单</span></div>
+    <div class="body"><p>hello →「你能做什么」，输出能力清单：文档生产 / 代码产品 / 研究分析 / 多媒体 / 系统自动化 / 专业专家。</p></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="idx">6</div>
+      <h3>开始问候交流</h3>
+      <div class="meta">10-10 16:04 ｜ 1/1 轮 ｜ 无 token 记录</div>
+    </div>
+    <div class="tags"><span class="tag">custom-local:gpt-6.1-sol</span><span class="tag">唯一非默认模型</span></div>
+    <div class="body"><p>单轮：「nihao」→ 问候。6 个任务里唯一使用 custom-local 模型的会话。</p></div>
+  </div>
+
+  <h2>从数据里看到的</h2>
+  <div class="card">
+    <div class="body" style="margin-top:0; padding-top:0; border-top:none">
+      <p><strong>1. 重心明确偏向 A 股实盘。</strong>「金叉」+「航天电子」两个任务占 <b>69% 的 tokens（310,921 / 449,016）</b>和 <b>98% 的积分（88.67 / 90.51）</b>，其余 4 个是探索性使用。</p>
+      <p><strong>2. 本地任务确实不上云。</strong>所有会话只存在本机 <code>workbuddy.db</code> + <code>projects/*.jsonl</code>，换电脑登录看不到 —— 这就是做这份快照的直接原因。</p>
+      <p><strong>3. 两个交易任务都落在同一个结论上：</strong>仓位结构与过滤条件，比选股信号本身更决定结果。</p>
+      <p><strong>4. 待办悬空：</strong>① 三条选股新规则尚未回测；② 航天电子 10/30 三季报是明确节点；③ 双方称呼未确定。</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>关于本快照</b>：这是一份<strong>摘要级</strong>归档，不含对话原文。原文仍在 <code>~/.workbuddy/projects/&lt;工作区&gt;/&lt;session-id&gt;.jsonl</code>，需要完整还原时可按 JSON 快照里的 <code>id</code> 字段对应取回。
+  </div>
+
+  <footer>
+    数据时点：2026-10-19 17:05 (GMT+8) ｜ 来源：本机 workbuddy.db · projects/*.jsonl · sidebar-list-snapshot.json<br>
+    行情结论均为历史对话归档，不代表当前行情，不构成投资建议。
+  </footer>
+
+</div>
+</body>
+</html>
